@@ -1,0 +1,184 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+        <title>REST SheetDB</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script>
+            var api_kei = '7nhygc3auoo40';
+            var url = "https://sheetdb.io/api/v1/" + api_kei + "/";
+            var xhttp = new XMLHttpRequest();
+            function queryAll() {
+                // 回傳結果
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && (this.status == 200 || this.status == 201)) {
+                        var jsonStr = this.responseText;
+                        console.log(jsonStr);
+                        document.getElementById("result").innerText = jsonStr;
+                        insertTbrow(jsonStr);
+                    }
+                };
+                var path = url;
+                // 送出訊息
+                console.log(path);
+                xhttp.open("GET", path, true);
+                xhttp.send();
+            }
+            function get() {
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && (this.status == 200 || this.status == 201)) {
+                        var jsonStr = this.responseText;
+                        console.log(jsonStr);
+                        document.getElementById("result").innerText = jsonStr;
+                        insertTbrow(jsonStr);
+                    }
+                };
+                var id = document.getElementById("id").value;
+                var path = url + "search?id=" + id;
+                console.log(path);
+                xhttp.open("GET", path, true);
+                xhttp.send();
+            }
+            function create() {
+                xhttp.onreadystatechange = function () {
+                    console.log(this.readyState + " " + this.status);
+                    if (this.readyState == 4 && (this.status == 200 || this.status == 201)) {
+                        console.log(this.responseText);
+                        document.getElementById("result").innerText = 'Add : ' + this.responseText;
+                        queryAll();
+                    }
+                };
+                var path = url;
+                xhttp.open("POST", path, true);
+                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                var id   = document.getElementById("id").value;
+                var name   = document.getElementById("name").value;
+                var age = document.getElementById("age").value;
+                var json = {
+                  "id": id,
+                  "name": name,
+                  "age": age
+                };
+                var args   = "data=" + JSON.stringify(json);
+                console.log(args);
+                xhttp.send(args);
+            }
+            function update() {
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && (this.status == 200 || this.status == 201)) {
+                        console.log(this.responseText);
+                        document.getElementById("result").innerText = 'Update : ' + this.responseText;
+                        queryAll();
+                    }
+                };
+                var id   = document.getElementById("id").value;
+                var path = url + "id/" + id;
+                console.log(path);
+                xhttp.open("PUT", path, true);
+                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                var name   = document.getElementById("name").value;
+                var age = document.getElementById("age").value;
+                var json = {
+                  "id": id,
+                  "name": name,
+                  "age": age
+                };
+                var args   = "data=" + JSON.stringify(json);
+                console.log(args);
+                xhttp.send(args);
+            }
+            function del() {
+                xhttp.onreadystatechange = function () {
+                    console.log(this.readyState + " " + this.status);
+                    if (this.readyState == 4 && (this.status == 200 || this.status == 204)) {
+                        console.log(this.responseText);
+                        document.getElementById("result").innerText = 'Delete OK' + this.responseText;
+                        queryAll();
+                    }
+                };
+                var id = document.getElementById("id").value;
+                var path = url + "id/" + id;
+                console.log(path);
+                xhttp.open("DELETE", path, true);
+                xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                xhttp.send();
+            }
+            function insertTbrow(jsonStr) {
+                var json = JSON.parse(jsonStr);
+                var tb = document.getElementById('myTable').getElementsByTagName('tbody')[0];
+                deleteRow();
+                for(var i=0; i<json.length; i++) {
+                    var newRow = tb.insertRow(tb.rows.length);
+                    newRow.setAttribute("onclick", "edit({0}, '{1}', '{2}')".format(json[i].id, json[i].name, json[i].age));
+                    var id_newCell  = newRow.insertCell(0);
+                    var id_newText  = document.createTextNode(json[i].id);
+                    id_newCell.appendChild(id_newText);
+                    var song_newCell  = newRow.insertCell(1);
+                    var song_newText  = document.createTextNode(json[i].name);
+                    song_newCell.appendChild(song_newText);
+                    var singer_newCell  = newRow.insertCell(2);
+                    var singer_newText  = document.createTextNode(json[i].age);
+                    singer_newCell.appendChild(singer_newText);
+                }
+            }
+            function deleteRow () {
+                while (true) {
+                    var tb = document.getElementById("myTable").getElementsByTagName('tbody')[0];
+                    if(tb.rows.length > 0) {
+                        tb.deleteRow(0);
+                    } else {
+                        break;
+                    }
+                }
+            };
+            function edit(id, name, age) {
+                window.document.getElementById("id").value = id;
+                window.document.getElementById("name").value = name;
+                window.document.getElementById("age").value = age;
+            }
+            if (!String.prototype.format) {
+              String.prototype.format = function() {
+                var args = arguments;
+                return this.replace(/{(\d+)}/g, function(match, number) {
+                  return typeof args[number] != 'undefined'
+                    ? args[number]
+                    : match
+                  ;
+                });
+              };
+            }
+        </script>
+    </head>
+    <body style="padding: 20px">
+        <form class="pure-form">
+            <fieldset>
+                <legend>REST SheetDB（javascript）</legend>
+                <input type="number" placeholder="請輸入id" name="id" id="id"><p>
+                <input type="text" placeholder="請輸入 name" name="name" id="name"><p>
+                <input type="text" placeholder="請輸入 age" name="age" id="age"><p>
+                <button type="button" class="pure-button pure-button-primary" onclick="create()">新增</button>
+                <button type="button" class="pure-button pure-button-primary" onclick="update()">修改</button>
+                <button type="button" class="pure-button pure-button-primary" onclick="del()">刪除</button>
+                <button type="button" class="pure-button pure-button-primary" onclick="get()">查詢單筆</button>
+                <button type="button" class="pure-button pure-button-primary" onclick="queryAll()" >查詢全部</button>
+            </fieldset>
+        </form>
+
+        <table class="pure-table pure-table-bordered" id="myTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>name</th>
+                    <th>age</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+        <p></p>
+        Log:
+        <div id="result"></div>
+    </body>
+</html>

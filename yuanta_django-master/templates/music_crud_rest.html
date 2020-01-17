@@ -1,0 +1,173 @@
+{% extends 'base_rest.html' %}
+{% block title %}Music 資料維護{% endblock %}
+{% block js %}
+    <script>
+        $(document).ready(function () {
+
+            // 字串格式化
+            String.format = function () {
+                var s = arguments[0];
+                for (var i = 0; i < arguments.length - 1; i++) {
+                    var reg = new RegExp("\\{" + i + "\\}", "gm");
+                    s = s.replace(reg, arguments[i + 1]);
+                }
+                return s;
+            }
+
+            // 取得 music rest url
+            function getUrl() {
+                return '/api/music/';
+            };
+
+            // 查詢所有 music
+            var queryMusic = function () {
+                $.getJSON(getUrl() + "?format=json", function (data) {
+                    $("table tbody").empty();
+                    $.each(data, function (i, item) {
+                        var id = data[i].id;
+                        var song = data[i].song;
+                        var singer = data[i].singer;
+                        var last_modify_date = data[i].last_modify_date;
+                        var created = data[i].created;
+                        markup = String.format('<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td></tr>', id, song, singer, last_modify_date, created);
+                        $("table tbody").append(markup);
+                    });
+                });
+            };
+
+            $('#my_table tbody').on('click', 'tr', function () {
+                $('#id').val($(this).find('td:eq(0)').text());
+                $('#song').val($(this).find('td:eq(1)').text());
+                $('#singer').val($(this).find('td:eq(2)').text());
+            });
+
+            $("#get_button").click(function () {
+                var id = prompt("Please enter music's id ?", isNaN($.cookie('id'))?'1':$.cookie('id'));
+                if(isNaN(id)) {
+                    return;
+                }
+                $.cookie('id', id, {expires: 1});
+                $.getJSON(getUrl() + id + '/?format=json', function (data) {
+                    console.log(data);
+
+                    var id = data.id;
+                    var song = data.song;
+                    var singer = data.singer;
+                    var last_modify_date = data.last_modify_date;
+                    var created = data.created;
+
+                    // 置入表單
+                    $('#id').val(id);
+                    $('#song').val(song);
+                    $('#singer').val(singer);
+
+                    // 置入表格
+                    $("table tbody").empty();
+                    markup = String.format('<tr><td>{0}</td><td>{1}</td><td>{2}</td><td>{3}</td><td>{4}</td></tr>', id, song, singer, last_modify_date, created);
+                    $("table tbody").append(markup);
+                });
+            });
+
+            $("#query_button").click(function () {
+                queryMusic();
+            });
+
+            $("#create_button").click(function () {
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                });
+                $.ajax({
+                    url: getUrl(),
+                    type: 'POST',  // GET, POST, PUT, DELETE
+                    data: $('#my_form').serialize(),
+                    success: function (data, status) {
+                        console.log(data);
+                        queryMusic();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR);
+                    }
+                });
+            });
+
+            $("#update_button").click(function () {
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                });
+                $.ajax({
+                    url: getUrl() + $('#id').val() + '/',  // 注意！最後的「/」一定要加~
+                    type: 'PUT',  // GET, POST, PUT, DELETE
+                    data: $('#my_form').serialize(),
+                    success: function (data, status) {
+                        console.log(data);
+                        queryMusic();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR);
+                    }
+                });
+            });
+
+            $("#delete_button").click(function () {
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                });
+                $.ajax({
+                    url: getUrl() + $('#id').val() + '/',  // 注意！最後的「/」一定要加~
+                    type: 'DELETE',  // GET, POST, PUT, DELETE
+                    success: function (data, status) {
+                        queryMusic();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR);
+                    }
+                });
+            });
+
+            // init function
+            queryMusic();
+
+        });
+    </script>
+{% endblock %}
+{% block content %}
+    <form id="my_form" class="pure-form">
+        {% csrf_token %}
+        <fieldset>
+            <legend>Music 資料維護</legend>
+            <input type="number" placeholder="id" id="id" name="id" value="" disabled>
+            <p/>
+            <input type="text" placeholder="song" id="song" name="song" value="">
+            <p/>
+            <input type="text" placeholder="singer" id="singer" name="singer" value="">
+            <p/>
+            <button type="button" class="pure-button pure-button-primary" id="create_button">Create</button>
+            <button type="button" class="pure-button pure-button-primary" id="update_button">Update</button>
+            <button type="button" class="pure-button pure-button-primary" id="delete_button">Delete</button>
+            <button type="button" class="pure-button pure-button-primary" id="get_button">查詢單筆</button>
+            <button type="button" class="pure-button pure-button-primary" id="query_button">查詢全部</button>
+            </fieldset>
+    </form>
+    <table id="my_table" class="pure-table pure-table-bordered">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>song</th>
+            <th>singer</th>
+            <th>last_modify_date</th>
+            <th>created</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        </tbody>
+    </table>
+
+{% endblock %}

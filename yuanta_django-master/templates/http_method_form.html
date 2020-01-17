@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Http method form
+{% endblock %}
+
+{% block pagetitle %}
+    Http method form
+{% endblock %}
+
+{% block js %}
+    <script>
+        var xhttp = new XMLHttpRequest();
+        function js_get() {
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var res = this.responseText;
+                    console.log(res);
+                    document.getElementById("result").innerText = res;
+                }
+            };
+            var text = document.getElementById("text").value;
+            var params = "?text=" + text;
+            xhttp.open("GET", "/http_method_result/" + params, true);
+            xhttp.send();
+        }
+        function js_post() {
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var res = this.responseText;
+                    console.log(res);
+                    document.getElementById("result").innerText = res;
+                }
+            };
+
+            xhttp.open("POST", "/http_method_result/", true);
+            var text = document.getElementById("text").value;
+            //var params = "csrfmiddlewaretoken={{ csrf_token }}&text=" + text;
+            var params = "text=" + text;
+            xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhttp.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            xhttp.send(params);
+        }
+        function js_put() {
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var res = this.responseText;
+                    console.log(res);
+                    document.getElementById("result").innerText = res;
+                }
+            };
+
+            xhttp.open("PUT", "/http_method_result/", true);
+            var text = document.getElementById("text").value;
+            var params = "text=" + text;
+            xhttp.setRequestHeader('Content-type', 'multipart/form-data');
+            xhttp.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            xhttp.send(params);
+        }
+        function js_delete() {
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var res = this.responseText;
+                    console.log(res);
+                    document.getElementById("result").innerText = res;
+                }
+            };
+
+            xhttp.open("DELETE", "/http_method_result/", true);
+            var text = document.getElementById("text").value;
+            var params = "text=" + text;
+            xhttp.setRequestHeader('Content-type', 'multipart/form-data');
+            xhttp.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            xhttp.send(params);
+        }
+
+    </script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $("#jquery_button").click(function () {
+                $.ajaxSetup({
+                    headers:{
+                        'X-CSRFToken':'{{ csrf_token }}'
+                    }
+                });
+                $.ajax({
+                    url: '/http_method_result/',
+                    type: 'PUT',  // GET, POST, PUT, DELETE
+                    data: $('#my_form').serialize(),
+                    success: function (data, status) {
+                        console.log("Data: " + data + "\nStatus: " + status);
+                        $('#result').text(data);
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR);
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock %}
+
+{% block content %}
+
+    <form class="pure-form" method="get" action="/http_method_result/" target="my_iframe">
+        <fieldset>
+            <legend>Http method form (Get)</legend>
+            <input type="text" placeholder="請輸入文字" name="text">
+            <button type="submit" class="pure-button pure-button-primary">Get</button>
+        </fieldset>
+    </form>
+    <form class="pure-form" method="post" action="/http_method_result/" target="my_iframe">
+        {% csrf_token %}
+        <fieldset>
+            <legend>Http method form (Post)</legend>
+            <input type="text" placeholder="請輸入文字" name="text">
+            <button type="submit" class="pure-button pure-button-primary">Post</button>
+        </fieldset>
+    </form>
+    <iframe name="my_iframe" frameborder="0" height="30"></iframe>
+    <hr>
+    <form class="pure-form" id="my_form">
+        {% csrf_token %}
+        <fieldset>
+            <legend>Http method form (Ajax)</legend>
+            <input type="text" placeholder="請輸入文字" id="text" name="text">
+            <button type="button" class="pure-button pure-button-primary" onclick="js_get()">JS Get</button>
+            <button type="button" class="pure-button pure-button-primary" onclick="js_post()">JS Post</button>
+            <button type="button" class="pure-button pure-button-primary" onclick="js_put()">JS Put</button>
+            <button type="button" class="pure-button pure-button-primary" onclick="js_delete()">JS Delete</button>
+            <p/>
+            <button type="button" class="pure-button pure-button-primary" id="jquery_button">jQuery Access</button>
+        </fieldset>
+    </form>
+    <div id="result"></div>
+    <br><br><br><br><br><br><br><br><br><br><br><br><br>
+{% endblock %}

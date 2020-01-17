@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% block title %}Django 使用者資料維護{% endblock %}
+{% block pagetitle %}Hello {{ user }}{% endblock %}
+{% block js %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // 字串格式化
+            String.format = function () {
+                var s = arguments[0];
+                for (var i = 0; i < arguments.length - 1; i++) {
+                    var reg = new RegExp("\\{" + i + "\\}", "gm");
+                    s = s.replace(reg, arguments[i + 1]);
+                }
+                return s;
+            }
+
+            // 查詢所有使用者
+            var queryUsers = function () {
+                $.getJSON("/users", function (data) {
+                    $("table tbody").empty();
+                    $.each(data, function (i, item) {
+                        var username = data[i].username;
+                        var email = data[i].email;
+                        var password = data[i].password;
+                        markup = String.format('<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>', username, email, password);
+                        $("table tbody").append(markup);
+                    });
+                });
+            };
+
+            $('#my_table tbody').on('click', 'tr', function () {
+                console.log($(this).find('td:eq(0)').text());
+                console.log($(this).find('td:eq(1)').text());
+                $('#username').val($(this).find('td:eq(0)').text());
+                $('#email').val($(this).find('td:eq(1)').text());
+
+            });
+
+            // 取得 rest url
+            function getUrl() {
+                return '/user/' + $('#username').val() + '/';
+            };
+
+            $("#create_button").click(function () {
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                });
+                $.ajax({
+                    url: getUrl(),
+                    type: 'POST',  // GET, POST, PUT, DELETE
+                    data: $('#my_form').serialize(),
+                    success: function (data, status) {
+                        console.log("Data: " + data + "\nStatus: " + status);
+                        //location.href = '/user_crud_form/';
+                        queryUsers();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR);
+                    }
+                });
+            });
+
+            $("#update_button").click(function () {
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                });
+                $.ajax({
+                    url: getUrl(),
+                    type: 'PUT',  // GET, POST, PUT, DELETE
+                    data: $('#my_form').serialize(),
+                    success: function (data, status) {
+                        console.log("Data: " + data + "\nStatus: " + status);
+                        queryUsers();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR);
+                    }
+                });
+            });
+
+            $("#delete_button").click(function () {
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                });
+                $.ajax({
+                    url: getUrl(),
+                    type: 'DELETE',  // GET, POST, PUT, DELETE
+                    data: $('#my_form').serialize(),
+                    success: function (data, status) {
+                        console.log("Data: " + data + "\nStatus: " + status);
+                        queryUsers();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR);
+                    }
+                });
+            });
+
+            // init
+            queryUsers();
+
+        });
+    </script>
+{% endblock %}
+{% block content %}
+    <form id="my_form" class="pure-form">
+        {% csrf_token %}
+        <fieldset>
+            <legend>Django 使用者資料維護</legend>
+            <input type="text" placeholder="Username" id="username" name="username" value="">
+            <p/>
+            <input type="email" placeholder="Email" id="email" name="email" value="">
+            <p/>
+            <input type="password" placeholder="Password" id="password" name="password" value="">
+            <p/>
+            <button type="button" class="pure-button pure-button-primary" id="create_button">Create</button>
+            <button type="button" class="pure-button pure-button-primary" id="update_button">Update</button>
+            <button type="button" class="pure-button pure-button-primary" id="delete_button">Delete</button>
+            <button type="button" class="pure-button pure-button-primary" onclick="location.href='/user_logout/'">
+                Logout
+            </button>
+        </fieldset>
+    </form>
+    <table id="my_table" class="pure-table pure-table-bordered">
+        <thead>
+        <tr>
+            <th>username</th>
+            <th>email</th>
+            <th>password</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        </tbody>
+    </table>
+
+{% endblock %}

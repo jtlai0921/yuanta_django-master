@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Hello User
+{% endblock %}
+
+{% block pagetitle %}
+    Hello User
+{% endblock %}
+
+{% block content %}
+    <form>
+        {{ amount }} 筆
+    </form>
+    <table class="pure-table pure-table-bordered">
+        <thead>
+        <tr>
+            <th>name</th>
+            <th>age</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.name }}</td>
+                <td>{{ user.age }}</td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="2">沒有資料</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

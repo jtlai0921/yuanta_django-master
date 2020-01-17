@@ -1,0 +1,170 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+        <title>REST SheetDB</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script>
+        $(document).ready(function () {
+            // 字串格式化
+            String.format = function () {
+                var s = arguments[0];
+                for (var i = 0; i < arguments.length - 1; i++) {
+                    var reg = new RegExp("\\{" + i + "\\}", "gm");
+                    s = s.replace(reg, arguments[i + 1]);
+                }
+                return s;
+            }
+            // 取得 music rest url
+            function getUrl() {
+                return 'https://sheetdb.io/api/v1/7nhygc3auoo40/';
+            };
+
+            // 查詢所有資料
+            var queryAll = function () {
+                var url = getUrl();
+                $.getJSON(url + "?format=json", function (data) {
+                    $("table tbody").empty();
+                    $.each(data, function (i, item) {
+                        var id = data[i].id;
+                        var name = data[i].name;
+                        var age = data[i].age;
+                        markup = String.format('<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>', id, name, age);
+                        $("table tbody").append(markup);
+                    });
+                });
+            };
+
+            $("#query_button").click(function () {
+                queryAll();
+            });
+
+            $('table tbody').on('click', 'tr', function () {
+                $('#id').val($(this).find('td:eq(0)').text());
+                $('#name').val($(this).find('td:eq(1)').text());
+                $('#age').val($(this).find('td:eq(2)').text());
+            });
+
+
+            $("#get_button").click(function () {
+                var id = prompt("Please enter music's id ?", 1);
+                if(isNaN(id)) {
+                    return;
+                }
+                var url = getUrl() + "search?id=" + id;
+                $.getJSON(url, function (data) {
+                    console.log(data);
+                    $("table tbody").empty();
+                    $.each(data, function (i, item) {
+                        var id = data[i].id;
+                        var name = data[i].name;
+                        var age = data[i].age;
+                        // 置入表單
+                        $('#id').val(id);
+                        $('#name').val(name);
+                        $('#age').val(age);
+                        markup = String.format('<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>', id, name, age);
+                        $("table tbody").append(markup);
+                    });
+                });
+            });
+            
+            $("#create_button").click(function () {
+                var id   = $('#id').val();
+                var name = $('#name').val();
+                var age  = $('#age').val();
+                var json = {
+                  "id": id,
+                  "name": name,
+                  "age": age
+                };
+                var data = "data=" + JSON.stringify(json);
+                $.ajax({
+                    url: getUrl(),
+                    type: 'POST', 
+                    data: data,
+                    success: function (data, status) {
+                        console.log(data);
+                        queryAll();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR);
+                    }
+                });
+            });
+
+            $("#update_button").click(function () {
+                var id   = $('#id').val();
+                var name = $('#name').val();
+                var age  = $('#age').val();
+                var json = {
+                  "id": id,
+                  "name": name,
+                  "age": age
+                };
+                var url = getUrl() + "id/" + id;
+                var data = "data=" + JSON.stringify(json);
+                $.ajax({
+                    url: url,  
+                    type: 'PATCH', // PUT 或 PATCH
+                    data: data,
+                    success: function (data, status) {
+                        console.log(data);
+                        queryAll();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR);
+                    }
+                });
+            });
+
+            $("#delete_button").click(function () {
+                var id   = $('#id').val();
+                var url = getUrl() + "id/" + id;
+                $.ajax({
+                    url: url,
+                    type: 'DELETE',
+                    success: function (data, status) {
+                        $("#my_form")[0].reset();
+                        queryAll();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR);
+                    }
+                });
+            });
+            
+        });
+    </script>
+    </head>
+    <body style="padding: 20px">
+        <form class="pure-form" id="my_form">
+            <fieldset>
+                <legend>REST SheetDB（jquery）</legend>
+                <input type="number" placeholder="請輸入id" name="id" id="id"><p>
+                <input type="text" placeholder="請輸入 name" name="name" id="name"><p>
+                <input type="text" placeholder="請輸入 age" name="age" id="age"><p>
+                <button type="button" class="pure-button pure-button-primary" id="create_button">新增</button>
+                <button type="button" class="pure-button pure-button-primary" id="update_button">修改</button>
+                <button type="button" class="pure-button pure-button-primary" id="delete_button">刪除</button>
+                <button type="button" class="pure-button pure-button-primary" id="get_button">查詢單筆</button>
+                <button type="button" class="pure-button pure-button-primary" id="query_button" >查詢全部</button>
+            </fieldset>
+        </form>
+
+        <table class="pure-table pure-table-bordered" id="myTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>name</th>
+                    <th>age</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+        
+    </body>
+</html>

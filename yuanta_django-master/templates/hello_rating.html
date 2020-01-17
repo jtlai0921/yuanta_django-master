@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Hello Line Chart
+{% endblock %}
+
+{% block pagetitle %}
+    Hello Line Chart
+{% endblock %}
+
+{% block js %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        google.charts.load('current', {'packages': ['corechart']});
+        google.charts.setOnLoadCallback(drawChart);
+        var chart;
+        var option;
+        var data;
+        var time = 2007;
+        var run_interval = null;
+        function drawChart() {
+            data = google.visualization.arrayToDataTable([
+                ['Year', '蔡先生', '韓小姐', '郭小姐', '林先生'],
+                ['2004', 0, 0, 0, 0],
+            ]);
+
+            options = {
+                title: 'Performance',
+                curveType: 'function',
+                legend: {position: 'top'}
+            };
+
+            chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+
+            chart.draw(data, options);
+        }
+
+        function update() {
+            console.log(run_interval);
+            var temp=[];
+            temp.push('' + (++time));
+            temp.push(getRandom(200, 1500));
+            temp.push(getRandom(200, 1500));
+            temp.push(getRandom(200, 1500));
+            temp.push(getRandom(200, 1500));
+            data.addRow(temp);
+            //console.log(data.wg.length)
+            if(data.wg.length > 10) // 資料筆數
+                data.removeRow(0); // 移除第一筆
+                //data.removeColumn(0); // 移除第一欄
+            chart.draw(data, options);
+        }
+
+        function run() {
+
+            if (run_interval == null) {
+                if(data.wg.length == 1) {
+                    data.removeRow(0);
+                }
+                run_interval = setInterval(update, 0);
+            } else {
+                clearInterval(run_interval);
+                run_interval = null;
+            }
+        }
+        function getRandom(min,max){
+            return Math.floor(Math.random()*(max-min+1))+min;
+        }
+
+    </script>
+{% endblock %}
+
+{% block content %}
+    <form class="pure-form">
+        {% csrf_token %}
+        <fieldset>
+            <legend>Hello Line Chart</legend>
+            <button type="button" class="pure-button pure-button-primary" onclick="run()">動畫看結果</button>
+        </fieldset>
+
+    </form>
+    <div id="curve_chart" style="width: 900px; height: 500px"></div>
+{% endblock %}

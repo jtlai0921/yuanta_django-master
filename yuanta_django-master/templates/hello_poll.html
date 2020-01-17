@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Hello Poll
+{% endblock %}
+
+{% block pagetitle %}
+    Hello Poll
+{% endblock %}
+
+{% block js %}
+    <script></script>
+{% endblock %}
+
+{% block content %}
+    <form class="pure-form" method="post" action="/hello_poll_result/" target="my_frame">
+        {% csrf_token %}
+        <fieldset>
+        <legend>Hello Poll</legend>
+
+        蔡先生：<input type="number" placeholder="請輸入票數" name="vote" value="100"><p />
+        韓小姐：<input type="number" placeholder="請輸入票數" name="vote" value="200"><p />
+        郭小姐：<input type="number" placeholder="請輸入票數" name="vote" value="300"><p />
+        林先生：<input type="number" placeholder="請輸入票數" name="vote" value="400"><p />
+
+        <button type="submit" class="pure-button pure-button-primary">看結果</button>
+    </fieldset>
+    <iframe name="my_frame" width="800" height="800" frameborder="1"></iframe>
+</form>
+{% endblock %}

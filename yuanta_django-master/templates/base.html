@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+    <head>
+        <title>{% block title %}{% endblock %}</title>
+        <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.1/build/pure-min.css">
+        <meta charset="UTF-8">
+    </head>
+    <body style="padding: 15px">
+        {% block js %}{% endblock %}
+        <h1>
+            {% block pagetitle %}{% endblock %}
+        </h1>
+
+        <p>
+            {% block content %}{% endblock %}
+        </p>
+    </body>
+</html>

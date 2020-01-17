@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+{% block title %}Login User Form{% endblock %}
+{% block pagetitle %}Login User Form{% endblock %}
+{% block js %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#login_button").click(function () {
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                });
+                $.ajax({
+                    url: '/user_login/',
+                    type: 'POST',  // GET, POST, PUT, DELETE
+                    data: $('#my_form').serialize(),
+                    success: function (data, status) {
+                        console.log(data);
+                        $('#result').text(data);
+                        setTimeout(function () {
+                            location.href = '/user_crud_form/';
+                        }, 3000);
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR);
+                    }
+                });
+            });
+
+            $("#logout_button").click(function () {
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                });
+                $.ajax({
+                    url: '/user_logout/',
+                    type: 'GET',  // GET, POST, PUT, DELETE
+                    success: function (data, status) {
+                        console.log(data);
+                        $('#result').text(data);
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR);
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}
+{% block content %}
+    <form id="my_form" class="pure-form">
+        {% csrf_token %}
+        <fieldset>
+            <legend>Django 使用者登入</legend>
+            <input type="text" placeholder="Username" id="username" name="username" value="{{ username }}">
+            <p/>
+            <input type="password" placeholder="Password" id="password" name="password" value="{{ password }}">
+            <p/>
+            <label for="remember">
+                <input type="checkbox" id="remember" name="remember" value="True" {{ remember }}> Remember me
+            </label>
+            <p/>
+            <img src="{{ image_url }}" alt="captcha" class="captcha" style="vertical-align:middle;"/>
+            <input name="captcha_0" type="hidden" value="{{ hashkey }}"/>
+            <input name="captcha_1" type="text" style="vertical-align:middle;width: 100px"/>
+            <p/>
+            <button type="button" class="pure-button pure-button-primary" id="login_button">Login</button>
+            <button type="button" class="pure-button pure-button-primary" onclick="location.href='/user_crud_form/'">
+                資料維護
+            </button>
+            <button type="button" class="pure-button pure-button-primary" id="logout_button">Logout</button>
+        </fieldset>
+    </form>
+    <div id="result"></div>
+{% endblock %}
